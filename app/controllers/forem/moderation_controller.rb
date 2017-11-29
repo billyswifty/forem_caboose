@@ -5,7 +5,7 @@ module Forem
     helper 'forem/posts'
 
     def index
-      @posts = forum.posts.pending_review
+      @forem_posts = forum.posts.pending_review
       @topics = forum.topics.pending_review
     end
 

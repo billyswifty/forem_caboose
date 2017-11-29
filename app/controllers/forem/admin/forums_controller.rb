@@ -4,7 +4,7 @@ module Forem
       before_filter :find_forum, :only => [:edit, :update, :destroy]
 
       def index
-        @forums = Forem::Forum.all
+        @forums = Forem::Forum.where(:site_id => @site.id).all
       end
 
       def new
@@ -13,6 +13,7 @@ module Forem
 
       def create
         @forum = Forem::Forum.new(params[:forum])
+        @forum.site_id = @site.id
         if @forum.save
           create_successful
         else

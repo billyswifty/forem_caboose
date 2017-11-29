@@ -7,11 +7,11 @@ module Forem
 
     def show
       if find_topic
-        register_view(@topic, forem_user)
-        @posts = find_posts(@topic)
+        register_view(@topic, @logged_in_user)
+        @forem_posts = find_posts(@topic)
 
         # Kaminari allows to configure the method and param used
-        @posts = @posts.send(pagination_method, params[pagination_param]).per(Forem.per_page)
+        @forem_posts = @forem_posts.send(pagination_method, params[pagination_param]).per(Forem.per_page)
       end
     end
 
@@ -24,7 +24,7 @@ module Forem
     def create
       authorize! :create_topic, @forum
       @topic = @forum.topics.build(params[:topic], :as => :default)
-      @topic.user = forem_user
+      @topic.user = @logged_in_user
       if @topic.save
         create_successful
       else
@@ -34,7 +34,7 @@ module Forem
 
     def destroy
       @topic = @forum.topics.find(params[:id])
-      if forem_user == @topic.user || forem_user.forem_admin?
+      if @logged_in_user == @topic.user || @logged_in_user.forem_admin?
         @topic.destroy
         destroy_successful
       else
@@ -44,14 +44,14 @@ module Forem
 
     def subscribe
       if find_topic
-        @topic.subscribe_user(forem_user.id)
+        @topic.subscribe_user(@logged_in_user.id)
         subscribe_successful
       end
     end
 
     def unsubscribe
       if find_topic
-        @topic.unsubscribe_user(forem_user.id)
+        @topic.unsubscribe_user(@logged_in_user.id)
         unsubscribe_successful
       end
     end
@@ -97,14 +97,14 @@ module Forem
     def find_posts(topic)
       posts = topic.posts
       unless forem_admin_or_moderator?(topic.forum)
-        posts = posts.approved_or_pending_review_for(forem_user)
+        posts = posts.approved_or_pending_review_for(@logged_in_user)
       end
-      @posts = posts
+      @forem_posts = posts
     end
 
     def find_topic
       begin
-        @topic = forum_topics(@forum, forem_user).find(params[:id])
+        @topic = forum_topics(@forum, @logged_in_user).find(params[:id])
         authorize! :read, @topic
       rescue ActiveRecord::RecordNotFound
         flash.alert = t("forem.topic.not_found")
@@ -117,7 +117,7 @@ module Forem
     end
 
     def block_spammers
-      if forem_user.forem_spammer?
+      if @logged_in_user.forem_spammer?
         flash[:alert] = t('forem.general.flagged_for_spam') + ' ' +
                         t('forem.general.cannot_create_topic')
         redirect_to :back

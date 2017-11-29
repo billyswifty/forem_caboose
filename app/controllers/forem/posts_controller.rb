@@ -11,11 +11,11 @@ module Forem
     before_filter :authorize_destroy_post_for_forum!, :only => [:destroy]
 
     def new
-      @post = @topic.posts.build
+      @forem_post = @topic.posts.build
       find_reply_to_post
 
       if params[:quote] && @reply_to_post
-        @post.text = view_context.forem_quote(@reply_to_post.text)
+        @forem_post.text = view_context.forem_quote(@reply_to_post.text)
       elsif params[:quote] && !@reply_to_post
         flash[:notice] = t("forem.post.cannot_quote_deleted_post")
         redirect_to [@topic.forum, @topic]
@@ -23,10 +23,10 @@ module Forem
     end
 
     def create
-      @post = @topic.posts.build(params[:post])
-      @post.user = forem_user
+      @forem_post = @topic.posts.build(params[:post])
+      @forem_post.user = forem_user
 
-      if @post.save
+      if @forem_post.save
         create_successful
       else
         create_failed
@@ -37,7 +37,7 @@ module Forem
     end
 
     def update
-      if @post.owner_or_admin?(forem_user) && @post.update_attributes(params[:post])
+      if @forem_post.owner_or_admin?(forem_user) && @forem_post.update_attributes(params[:post])
         update_successful
       else
         update_failed
@@ -45,7 +45,7 @@ module Forem
     end
 
     def destroy
-      @post.destroy
+      @forem_post.destroy
       destroy_successful
     end
 
@@ -75,8 +75,8 @@ module Forem
     end
 
     def destroy_successful
-      if @post.topic.posts.count == 0
-        @post.topic.destroy
+      if @forem_post.topic.posts.count == 0
+        @forem_post.topic.destroy
         flash[:notice] = t("forem.post.deleted_with_topic")
         redirect_to [@topic.forum]
       else
@@ -95,7 +95,7 @@ module Forem
     end
 
     def ensure_post_ownership!
-      unless @post.owner_or_admin? forem_user
+      unless @forem_post.owner_or_admin? forem_user
         flash[:alert] = t("forem.post.cannot_delete")
         redirect_to [@topic.forum, @topic] and return
       end
@@ -106,7 +106,7 @@ module Forem
     end
 
     def find_post_for_topic
-      @post = @topic.posts.find params[:id]
+      @forem_post = @topic.posts.find params[:id]
     end
 
     def block_spammers

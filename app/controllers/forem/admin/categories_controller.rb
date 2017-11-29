@@ -4,7 +4,7 @@ module Forem
       before_filter :find_category, :only => [:edit, :update, :destroy]
 
       def index
-        @category = Forem::Category.all
+        @category = Forem::Category.where(:site_id => @site.id).all
       end
 
       def new
@@ -17,6 +17,8 @@ module Forem
         else
           create_failed
         end
+        @category.site_id = @site.id
+        @category.save
       end
 
       def update

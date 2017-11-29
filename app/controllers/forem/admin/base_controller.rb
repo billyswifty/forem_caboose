@@ -1,9 +1,13 @@
 module Forem
   module Admin
     class BaseController < ApplicationController
-      layout Forem.layout
+      layout "caboose/application"
       
       before_filter :authenticate_forem_admin
+
+      def forem_user
+        return @logged_in_user
+      end
 
       def index
         # TODO: perhaps gather some stats here to show on the admin page?

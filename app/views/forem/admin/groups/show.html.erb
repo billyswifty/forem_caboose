@@ -25,7 +25,7 @@
   </div>
 <% end %>
 
-
+<% content_for :caboose_js do %>
 <script>
   $("#user_id").select2({
     containerCssClass: "col-md-5",
@@ -46,3 +46,4 @@
     }
   });
 </script>
+<% end %>

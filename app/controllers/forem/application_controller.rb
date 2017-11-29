@@ -1,7 +1,7 @@
 require 'cancan'
 
 class Forem::ApplicationController < ApplicationController
-  layout Forem.layout
+  layout 'caboose/application'
   
   rescue_from CanCan::AccessDenied do
     redirect_to root_path, :alert => t("forem.access_denied")
@@ -9,6 +9,10 @@ class Forem::ApplicationController < ApplicationController
 
   def current_ability
     Forem::Ability.new(forem_user)
+  end
+
+  def forem_user
+    logged_in_user
   end
 
   # Kaminari defaults page_method_name to :page, will_paginate always uses

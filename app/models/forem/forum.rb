@@ -8,6 +8,7 @@ module Forem
     friendly_id :name, :use => :slugged
 
     belongs_to :category
+    belongs_to :site, :class_name => "Caboose::Site"
 
     has_many :topics,     :dependent => :destroy
     has_many :posts,      :through => :topics, :dependent => :destroy
@@ -16,7 +17,7 @@ module Forem
 
     validates :category, :name, :description, :presence => true
 
-    attr_accessible :category_id, :title, :name, :description, :moderator_ids
+    attr_accessible :category_id, :title, :name, :description, :moderator_ids, :site_id
 
     alias_attribute :title, :name
 

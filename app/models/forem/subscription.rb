@@ -8,11 +8,7 @@ module Forem
     attr_accessible :subscriber_id
 
     def send_notification(post_id)
-      # If a user cannot be found, then no-op
-      # This will happen if the user record has been deleted.
-      if subscriber.present?
-        SubscriptionMailer.topic_reply(post_id, subscriber.id).deliver
-      end
+      # does nothing
     end
   end
 end

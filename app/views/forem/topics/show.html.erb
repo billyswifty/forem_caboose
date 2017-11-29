@@ -38,11 +38,11 @@
     </div>
   <% end %>
 
-  <%= forem_pages_widget(@posts) %>
+  <%= forem_pages_widget(@forem_posts) %>
 
   <div id='posts'>
-    <%= render :partial => "forem/posts/post", :collection => @posts %>
+    <%= render :partial => "forem/posts/post", :collection => @forem_posts %>
   </div>
 
-  <%= forem_pages_widget(@posts) %>
+  <%= forem_pages_widget(@forem_posts) %>
 </div>

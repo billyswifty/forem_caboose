@@ -4,7 +4,7 @@ module Forem
       before_filter :find_group, :only => [:show, :destroy]
 
       def index
-        @groups = Forem::Group.all
+        @groups = Forem::Group.where(:site_id => @site.id).all
       end
 
       def new
@@ -13,6 +13,7 @@ module Forem
 
       def create
         @group = Forem::Group.new(params[:group])
+        @group.site_id = @site.id
         if @group.save
           flash[:notice] = t("forem.admin.group.created")
           redirect_to [:admin, @group]

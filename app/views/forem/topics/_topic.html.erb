@@ -1,17 +1,17 @@
 <tr class="topic <%= cycle('odd', 'even') %> <%= topic.locked? ? 'locked' : 'unlocked' %>">
   <td class='icon'>
     <% if topic.locked? %>
-      <span class='lock icon'></span>
+      <span class='tticon-lock'></span>
     <% end %>
     <% if topic.pinned? %>
-      <span class='pin icon'></span>
+      <span class='tticon-pin'></span>
     <% end %>
     <% if topic.hidden? %>
-      <span class='hidden icon'></span>
+      <span class='tticon-hidden'></span>
     <% end %>
     <% if forem_user && view = topic.view_for(forem_user) %>
       <% if topic.posts.exists?(["created_at > ?", view.updated_at]) %>
-        <span class='new_posts icon'>new</span>
+        <span class='tticon-new'>new</span>
       <% end %>
     <% end %>
   </td>

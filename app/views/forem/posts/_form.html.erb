@@ -1,5 +1,42 @@
-<%= f.input :text, :input_html => { :class => "field col-md-12" } %>
+<div class="text-editor-wrap">
+	<%= f.input :text, :input_html => { :class => "field col-md-12" } %>
+</div>
 
 <% if params[:reply_to_id] %>
   <%= f.hidden_field :reply_to_id, :value => params[:reply_to_id] %>
+<% end %>
+
+<% content_for :caboose_css do %>
+	<% stylesheet_link_tag "//cdn.quilljs.com/1.2.2/quill.snow.css" %>
+<% end %>
+
+<% content_for :caboose_js do %>
+	<script src="//cdn.quilljs.com/1.2.2/quill.min.js"></script>
+	<script>
+		$(document).ready(function() {
+			var options = {
+				theme: 'snow'
+			};
+		//	var editor = new Quill('.text-editor-wrap textarea', options);
+			// $("#press-release-form").submit(function(event) {
+			// 	var mess = $("#press-release-form").next("#message");
+			// 	var post_body = $('.ql-editor').html();
+			// 	var error = "";
+			// 	if ( $("#company_name").val() == "" )
+			// 		error = "Company name is required.";
+			// 	else if ( $("#post_title").val() == "" )
+			// 		error = "Title is required.";
+			// 	else if ( post_body == "" )
+			// 		error = "Body is required.";
+			// 	if (error != "") {
+			// 		event.preventDefault();
+			// 		mess.html("<p class='note error'>" + error + "</p>");
+			// 	}
+			// 	else {
+			// 		$("#post_body").val(post_body);
+			// 		mess.html("<p class='note loading'>Submitting form...</p>");
+			// 	}
+			// });
+		});
+	</script>
 <% end %>

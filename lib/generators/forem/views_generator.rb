@@ -13,7 +13,6 @@ module Forem
         view_directory :forums
         view_directory :moderation
         view_directory :posts
-        view_directory :subscription_mailer
         view_directory :topics
       end
 
