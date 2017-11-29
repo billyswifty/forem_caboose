@@ -1,12 +1,18 @@
+<% if @categories.count == 0 %>
+  <div style="padding:60px 2%;text-align:center;background:#fff;">
+    <img src="//cabooseit.s3.amazonaws.com/uploads/error_404.png" width="150" />
+    <h1 style="font-size:3em;font-weight:bold;margin-bottom:20px;margin-top:40px;color:#4b4b4b;">Oops!</h1>
+    <p style="color:#4b4b4b;font-size:18px;">The page you are looking for could not be found.</p>
+  </div>
+<% else %>
 <div id='forums_container'>
   <h1 id='forums_title'><%= t('.title') %></h1>
-
   <%= render @categories %>
 </div>
-
-<br>
+<br />
 <footer id='admin_link'>
   <% if forem_admin? %>
     <%= link_to t("area", :scope => "forem.admin"), forem.admin_root_path %>
   <% end %>
 </footer>
+<% end %>
