@@ -28,7 +28,7 @@ describe User do
       describe "#forem_name" do
         it "responds to our own name method" do
           subject.should receive :login
-          subject.forem_name
+          subject.username
         end
       end
     end
@@ -59,7 +59,7 @@ describe User do
         it "defaults with 'to_s'" do
           subject.should respond_to :forem_name
           subject.should receive :to_s
-          subject.forem_name
+          subject.username
         end
       end
     end

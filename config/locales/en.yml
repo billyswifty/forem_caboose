@@ -20,11 +20,11 @@ en:
       back_to_admin: "Back to Admin"
       back_to_forums: "Back to forums"
       back_to_groups: "Back to groups"
-      welcome: "Welcome to forem's Admin Area."
+      welcome: "Welcome to the forum admin area."
       forum:
         moderator_groups: Moderator groups
         index: Manage Forums
-        new: Creating a new forum
+        new: Create a new forum
         new_link: New Forum
         deleted: The selected forum has been deleted.
         created: This forum has been created.
@@ -61,7 +61,7 @@ en:
         name: Name
       category:
         index: Manage Forum Categories
-        new: Creating a new Forum Category
+        new: Create a new Forum Category
         edit: "Editing the %{title} category"
         new_link: New Forum Category
         deleted: The selected forum category has been deleted.
@@ -82,7 +82,7 @@ en:
     forum:
       header: "Viewing %{title}"
       forums: Forums
-      new: Creating a new forum
+      new: Create a new forum
       edit: "Editing the %{title} forum"
       topics_count:
         zero: 0 topics
@@ -114,8 +114,8 @@ en:
       quote: Quote
       delete: Delete
       created: This topic has been created.
-      new: Creating a new topic
-      edit: Editing topic
+      new: Create a new topic
+      edit: Edit topic
       not_created: This topic could not be created.
       deleted: Your topic has been deleted.
       cannot_delete: You cannot delete a topic you do not own.
@@ -161,7 +161,7 @@ en:
         edit: Edit
       created: Your reply has been posted.
       new: Post reply to
-      edit: Editing post
+      edit: Edit post
       not_created: Your reply could not be posted.
       not_created_topic_locked: You cannot reply to a locked topic.
       edited: Your post has been edited.

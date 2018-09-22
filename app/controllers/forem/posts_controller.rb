@@ -13,7 +13,6 @@ module Forem
     def new
       @forem_post = @topic.posts.build
       find_reply_to_post
-
       if params[:quote] && @reply_to_post
         @forem_post.text = view_context.forem_quote(@reply_to_post.text)
       elsif params[:quote] && !@reply_to_post

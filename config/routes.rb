@@ -5,6 +5,8 @@ Forem::Engine.routes.draw do
   #   resources :posts
   # end
 
+  # get '/api/members/autocomplete', :to => "members#autocomplete", :as => "member_autocomplete"
+
   resources :categories, :only => [:index, :show]
 
   namespace :admin do
@@ -30,7 +32,7 @@ Forem::Engine.routes.draw do
 
     resources :categories
 
-    get 'users/autocomplete', :to => "users#autocomplete", :as => "user_autocomplete"
+    # get 'users/autocomplete', :to => "users#autocomplete", :as => "user_autocomplete"
   end
 
 

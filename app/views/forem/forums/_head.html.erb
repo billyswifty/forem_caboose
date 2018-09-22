@@ -3,7 +3,7 @@
   <span id='description'><%= forem_format(forum.description) %></span>
   <div id='forum_topic_links' class='btn-group'>
     <% unless @topic.try(:new_record?) %>
-      <% if can? :create_topic, @forum %>
+      <% if (can? :create_topic, @forum) && @logged_in_user && @logged_in_user.username != 'elo' %>
         <%= link_to t('forem.topic.links.new'), forem.new_forum_topic_path(forum), :class => "btn btn-primary", :id => "new-topic" %>
       <% end %>
     <% end %>

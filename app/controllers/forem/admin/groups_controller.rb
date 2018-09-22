@@ -8,7 +8,7 @@ module Forem
       end
 
       def new
-        @group = Forem::Group.new
+        @group = Forem::Group.new(:site_id => @site.id)
       end
 
       def create

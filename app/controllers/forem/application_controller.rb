@@ -30,7 +30,10 @@ class Forem::ApplicationController < ApplicationController
   private
 
   def authenticate_forem_user
-    if !forem_user
+    if logged_in_user.nil? || logged_in_user.username == 'elo'
+      redirect_to "/user-login?return_url=#{request.fullpath}"
+      return
+    elsif !forem_user
       session["user_return_to"] = request.fullpath
       flash.alert = t("forem.errors.not_signed_in")
       devise_route = "new_#{Forem.user_class.to_s.underscore}_session_path"

@@ -1,14 +1,14 @@
 module Forem
   module PostsHelper
     def forem_avatar(user, options = {})
-      image = if Forem.avatar_user_method
-        # Try to use the user's custom avatar method
-        user.try Forem.avatar_user_method.to_sym
-      else
-        avatar_url user.forem_email, options
-      end
-
-      image_tag image, :alt => "Avatar" if image.present?
+      image = user.image.url(:large)
+      # image = if Forem.avatar_user_method
+      #   # Try to use the user's custom avatar method
+      #   user.image.url(:large)
+      # else
+      #   avatar_url user.forem_email, options
+      # end
+      image_tag image, :alt => user.username, :width => 60, :height => 60 if image.present?
     end
 
     def avatar_url(email, options = {})

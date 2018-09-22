@@ -4,7 +4,7 @@ module Forem
     helper 'forem/topics'
 
     def index
-      @categories = Forem::Category.where(:site_id => @site.id).all
+      @categories = Forem::Category.where(:site_id => @site.id).order(:sort_order).all
     end
 
     def show
