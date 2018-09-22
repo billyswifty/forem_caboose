@@ -4,6 +4,7 @@ module Forem
 
     helper 'forem/posts'
 
+    # index
     def index
       @forem_posts = forum.posts.pending_review
       @topics = forum.topics.pending_review
