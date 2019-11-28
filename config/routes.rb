@@ -1,12 +1,6 @@
 Forem::Engine.routes.draw do
   root :to => "forums#index"
 
-  # resources :topics, :only => [:new, :create, :index, :show, :destroy] do
-  #   resources :posts
-  # end
-
-  # get '/api/members/autocomplete', :to => "members#autocomplete", :as => "member_autocomplete"
-
   resources :categories, :only => [:index, :show]
 
   namespace :admin do
@@ -32,20 +26,8 @@ Forem::Engine.routes.draw do
 
     resources :categories
 
-    # get 'users/autocomplete', :to => "users#autocomplete", :as => "user_autocomplete"
+    get 'users/autocomplete', :to => "users#autocomplete", :as => "user_autocomplete"
   end
-
-
-  resources :forums, :only => [:index, :show], :path => "/" do
-    resources :topics do
-      resources :posts
-      member do
-        post :subscribe
-        post :unsubscribe
-      end
-    end
-  end
-
 
   get '/:forum_id/moderation', :to => "moderation#index", :as => :forum_moderator_tools
   # For mass moderation of posts
@@ -53,5 +35,13 @@ Forem::Engine.routes.draw do
   # Moderation of a single topic
   put '/:forum_id/topics/:topic_id/moderate', :to => "moderation#topic", :as => :moderate_forum_topic
 
-
+  resources :forums, :only => [:index, :show], :path => "/" do
+    resources :topics, :except => :index do
+      resources :posts, :except => :index
+      member do
+        post :subscribe
+        post :unsubscribe
+      end
+    end
+  end
 end

@@ -5,10 +5,9 @@ module Forem
     include Forem::Concerns::Viewable
 
     extend FriendlyId
-    friendly_id :name, :use => :slugged
+    friendly_id :name, :use => [:slugged, :finders]
 
     belongs_to :category
-    belongs_to :site, :class_name => "Caboose::Site"
 
     has_many :topics,     :dependent => :destroy
     has_many :posts,      :through => :topics, :dependent => :destroy
@@ -16,13 +15,11 @@ module Forem
     has_many :moderator_groups
 
     validates :category, :name, :description, :presence => true
-
-    attr_accessible :category_id, :title, :name, :description, :moderator_ids, :site_id
+    validates :position, numericality: { only_integer: true }
 
     alias_attribute :title, :name
 
-    # Fix for #339
-    default_scope order('sort_order ASC')
+    default_scope { order(:position) }
 
     def last_post_for(forem_user)
       if forem_user && (forem_user.forem_admin? || moderator?(forem_user))
@@ -37,27 +34,11 @@ module Forem
     end
 
     def moderator?(user)
-      user && belongs_to_moderator_group(user)
+      user && (user.forem_group_ids & moderator_ids).any?
     end
 
     def to_s
       name
-    end
-
-    private
-
-    # could be much cleaner using moderator_ids and user.forem_group_ids
-    # but unfortunately it breaks jruby builds
-    def belongs_to_moderator_group(user)
-      (forem_group_ids_for(user) & get_moderator_ids).any?
-    end
-
-    def forem_group_ids_for(user)
-      user.forem_groups.map { |u| u.id }
-    end
-
-    def get_moderator_ids
-      moderators.map { |m| m.id }
     end
   end
 end

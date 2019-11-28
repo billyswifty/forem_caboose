@@ -5,35 +5,20 @@ module Forem
     include Forem::Concerns::Viewable
     include Forem::Concerns::NilUser
     include Workflow
-
-    workflow_column :state
-    workflow do
-      state :pending_review do
-        event :spam,    :transitions_to => :spam
-        event :approve, :transitions_to => :approved
-      end
-      state :spam
-      state :approved do
-        event :approve, :transitions_to => :approved
-      end
-    end
+    include Forem::StateWorkflow
 
     attr_accessor :moderation_option
 
     extend FriendlyId
-    friendly_id :subject, :use => :slugged
-
-    attr_accessible :subject, :posts_attributes
-    attr_accessible :subject, :posts_attributes, :pinned, :locked, :hidden, :forum_id, :as => :admin
+    friendly_id :subject, :use => [:slugged, :finders]
 
     belongs_to :forum
     belongs_to :forem_user, :class_name => Forem.user_class.to_s, :foreign_key => :user_id
-    has_many   :subscriptions
-    has_many   :posts, :dependent => :destroy, :order => "forem_posts.created_at ASC"
-
+    has_many   :subscriptions, :dependent => :destroy
+    has_many   :posts, -> { order "forem_posts.created_at ASC"}, :dependent => :destroy
     accepts_nested_attributes_for :posts
 
-    validates :subject, :presence => true
+    validates :subject, :presence => true, :length => { maximum: 255 }
     validates :user, :presence => true
 
     before_save  :set_first_post_user
@@ -56,7 +41,7 @@ module Forem
       end
 
       def by_pinned_or_most_recent_post
-	      order('forem_topics.pinned DESC').
+  order('forem_topics.pinned DESC').
         order('forem_topics.last_post_at DESC').
         order('forem_topics.id')
       end

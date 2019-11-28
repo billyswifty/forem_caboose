@@ -5,7 +5,7 @@ module Forem
 
     validates :subscriber_id, :presence => true
 
-    attr_accessible :subscriber_id
+    # attr_accessible :subscriber_id
 
     def send_notification(post_id)
     	Caboose.log("sending notification to user #{self.subscriber.id} about post #{post_id} on topic #{self.topic.id}...")
