@@ -2,7 +2,7 @@
 <div id='post_<%= post.id %>' class='reply_to_post post <%= cycle('odd', 'even') -%> col-md-10'>
   <div class='user col-md-2'>
     <div class='username'>
-      <a href="/profiles/<%= post.user.id %>/username/<%= post.user.username %>"><%= post.user.username %></a>
+      <a href="<%= post.user.url %>"><%= post.user.username %></a>
       <%# link_to_if Forem.user_profile_links, post.user.username, [main_app, post.user] %>
     </div>
     <div class='icon'>

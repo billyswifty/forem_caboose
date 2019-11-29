@@ -8,10 +8,11 @@ module Forem
     def show
       if find_topic
         register_view(@topic, forem_user)
-        @posts = find_posts(@topic)
+        @forem_posts = find_posts(@topic)
 
         # Kaminari allows to configure the method and param used
-        @posts = @posts.send(pagination_method, params[pagination_param]).per(Forem.per_page)
+        @forem_posts = @forem_posts.send(pagination_method, params[pagination_param]).per(Forem.per_page)
+        Caboose.log(@forem_posts)
       end
     end
 
@@ -104,7 +105,7 @@ module Forem
       unless forem_admin_or_moderator?(topic.forum)
         posts = posts.approved_or_pending_review_for(forem_user)
       end
-      @posts = posts
+      @forem_posts = posts
     end
 
     def find_topic

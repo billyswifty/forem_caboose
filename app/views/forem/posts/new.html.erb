@@ -3,7 +3,7 @@
 <h3 class="reply-to-post"><%= t("forem.post.new") %> <em><%= @topic.subject %></em></h3>
 
 <% if @reply_to_post %>
-	<%= render 'reply_to_post', :post => @reply_to_post %>
+  <%= render 'reply_to_post', :post => @reply_to_post %>
 <% end %>
 
 <%= simple_form_for [forem, @topic.forum, @topic, @forem_post] do |f| %>
