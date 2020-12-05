@@ -39,6 +39,10 @@ module Forem
         end
       end
 
+      def num_pages
+        return 10
+      end
+
       def by_created_at
         order :created_at
       end

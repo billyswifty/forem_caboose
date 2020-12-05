@@ -30,6 +30,10 @@ module Forem
         where(:hidden => false)
       end
 
+      def num_pages
+        return 10
+      end
+
       def by_pinned
         order('forem_topics.pinned DESC').
         order('forem_topics.id')
@@ -124,6 +128,10 @@ module Forem
 
     def last_page
       (self.posts.count.to_f / Forem.per_page.to_f).ceil
+    end
+
+    def num_pages
+      return (self.posts.count.to_f / Forem.per_page.to_f).to_i
     end
 
     protected

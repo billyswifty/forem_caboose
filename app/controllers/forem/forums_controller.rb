@@ -5,6 +5,9 @@ module Forem
 
     def index
       @categories = Forem::Category.where(:site_id => @site.id).by_position
+      if defined?(@page) && defined?(@site)
+        @page.seo_title = "Forums | #{@site.description}"
+      end
     end
 
     def show
@@ -21,6 +24,10 @@ module Forem
 
       # Kaminari allows to configure the method and param used
       @topics = @topics.send(pagination_method, params[pagination_param]).per(Forem.per_page)
+
+      if defined?(@page) && defined?(@site)
+        @page.seo_title = "#{@forum.title} | #{@forum.category.name} Forums on #{@site.description}"
+      end
 
       respond_to do |format|
         format.html

@@ -8,6 +8,10 @@ module Forem
       find_post
       page = (@topic.posts.count.to_f / Forem.per_page.to_f).ceil
 
+      if defined?(@page) && defined?(@site)
+        @page.seo_title = "#{@post.title} | #{@post.forum.title} Forums on #{@site.description}"
+      end
+
       redirect_to forum_topic_url(@topic.forum, @topic, pagination_param => page, anchor: "post-#{@forem_post.id}")
     end
 
@@ -23,6 +27,11 @@ module Forem
         flash[:notice] = t("forem.post.cannot_quote_deleted_post")
         redirect_to [@topic.forum, @topic]
       end
+
+      if defined?(@page) && defined?(@site)
+        @page.seo_title = "New Post | #{@topic.subject} Forum on #{@site.description}"
+      end
+
     end
 
     def create

@@ -12,7 +12,10 @@ module Forem
 
         # Kaminari allows to configure the method and param used
         @forem_posts = @forem_posts.send(pagination_method, params[pagination_param]).per(Forem.per_page)
-        Caboose.log(@forem_posts)
+
+        if defined?(@page) && defined?(@site)
+          @page.seo_title = "#{@topic.subject} | #{@topic.forum.title} Forum on #{@site.description}"
+        end
       end
     end
 
@@ -20,6 +23,9 @@ module Forem
       authorize! :create_topic, @forum
       @topic = @forum.topics.build
       @topic.posts.build
+      if defined?(@page) && defined?(@site)
+        @page.seo_title = "New Topic | #{@forum.title} Forum on #{@site.description}"
+      end
     end
 
     def create

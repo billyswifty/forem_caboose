@@ -17,11 +17,11 @@ module Forem
     end
 
     def forem_pages_widget(collection, options={})
-      # if collection.num_pages > 1
-      #   content_tag :div, :class => 'pages' do
-      #     (forem_paginate(collection, options)).html_safe
-      #   end
-      # end
+      if collection.num_pages > 1
+        content_tag :div, :class => 'pages' do
+          (forem_paginate(collection, options)).html_safe
+        end
+      end
     end
 
     def forem_paginate(collection, options={})
