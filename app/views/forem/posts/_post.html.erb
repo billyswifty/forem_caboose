@@ -30,11 +30,12 @@
       </div>
 
       <div class='contents col-md-7'>
-        <a href='#post-<%= post.id %>'>
+        <a class="post-time" href='#post-<%= post.id %>'>
           <%= post_time_tag(post) %>
         </a>
-        <%= forem_format(post.text) %>
-
+        <div class="richtext">
+          <%== forem_format(post.text) %>
+        </div>
         <% if post.reply_to %>
           <div class='in-reply-to'>
             <%= link_to "#{t("forem.post.in_reply_to")} #{post.reply_to.user.username}", "#post_#{post.reply_to.id}" %>

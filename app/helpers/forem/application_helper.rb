@@ -3,7 +3,13 @@ module Forem
     include FormattingHelper
     # processes text with installed markup formatter
     def forem_format(text, *options)
-      forem_emojify(as_formatted_html(text))
+      return "" if text.blank?
+      txt = text.gsub("\n","<br />")
+      begin
+        return Rinku.auto_link(txt, mode=:all, link_attr='target="_blank"', skip_tags=nil)
+      rescue
+        return txt
+      end
     end
 
     def forem_quote(text)
@@ -11,7 +17,6 @@ module Forem
     end
 
     def forem_markdown(text, *options)
-      #TODO: delete deprecated method
       Rails.logger.warn("DEPRECATION: forem_markdown is replaced by forem_format() + forem-markdown_formatter gem, and will be removed")
       forem_format(text)
     end
