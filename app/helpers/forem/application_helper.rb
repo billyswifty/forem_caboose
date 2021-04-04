@@ -1,10 +1,16 @@
 module Forem
   module ApplicationHelper
     include FormattingHelper
+
     # processes text with installed markup formatter
     def forem_format(text, *options)
       return "" if text.blank?
       txt = text.gsub("\n","<br />")
+      bad_words = ["fuck","nigger","shit","cunt","asshole","bitch"]
+      bad_words.each do |bw|
+        st = bw.chars.map{|c| "*"}.join("")
+        txt = txt.gsub(bw,st).gsub(bw.upcase,st).gsub(bw.titleize,st)
+      end
       begin
         return Rinku.auto_link(txt, mode=:all, link_attr='target="_blank"', skip_tags=nil)
       rescue
@@ -46,13 +52,17 @@ module Forem
     end
 
     def forem_emojify(content)
-      h(content).to_str.gsub(/:([\w+-]+):/) do |match|
-        if emoji = Emoji.find_by_alias($1)
-          %(<img alt="#$1" src="#{asset_path("emoji/#{emoji.image_filename}", type: :image)}" style="vertical-align:middle" width="20" height="20" />)
-        else
-          match
-        end
-      end.html_safe if content.present?
+
+      return "" if content.blank?
+      txt = h(content).to_str
+      bad_words = ["fuck","nigger","shit","cunt","asshole","bitch"]
+      bad_words.each do |bw|
+        st = bw.chars.map{|c| "*"}.join("")
+        txt = txt.gsub(bw,st).gsub(bw.upcase,st).gsub(bw.titleize,st)
+      end
+
+      return txt.html_safe
+
     end
   end
 end
