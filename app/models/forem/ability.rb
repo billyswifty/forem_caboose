@@ -37,15 +37,15 @@ module Forem
       end
 
       can :create_topic, Forem::Forum do |forum|
-        can?(:read, forum) && user.can_create_forem_topics?(forum)
+        can?(:read, forum) && user.can_create_forem_topics?(forum) && user.date_created && user.date_created <= (DateTime.now - 3.days) && user.verified_email
       end
 
       can :reply, Forem::Topic do |topic|
-        can?(:read, topic.forum) && user.can_reply_to_forem_topic?(topic)
+        can?(:read, topic.forum) && user.can_reply_to_forem_topic?(topic) && user.date_created && user.date_created <= (DateTime.now - 3.days) && user.verified_email
       end
 
       can :edit_post, Forem::Forum do |forum|
-        user.can_edit_forem_posts?(forum)
+        user.can_edit_forem_posts?(forum) && user.date_created && user.date_created <= (DateTime.now - 3.days) && user.verified_email
       end
       
       can :destroy_post, Forem::Forum do |forum|
