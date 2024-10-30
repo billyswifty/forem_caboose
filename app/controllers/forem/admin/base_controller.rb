@@ -3,7 +3,7 @@ module Forem
     class BaseController < ApplicationController
       layout "caboose/application"
       
-      before_filter :authenticate_forem_admin
+      before_action :authenticate_forem_admin
 
       def forem_user
         return @logged_in_user

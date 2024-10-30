@@ -41,7 +41,7 @@ module Forem
         will_paginate collection, options
       else
         # Otherwise use Kaminari
-        paginate collection, options
+        paginate collection #, options
       end
     end
 

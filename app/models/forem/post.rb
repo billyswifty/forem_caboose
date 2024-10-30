@@ -9,7 +9,7 @@ module Forem
 
     belongs_to :topic
     belongs_to :forem_user, :class_name => "Caboose::User", :foreign_key => :user_id
-    belongs_to :reply_to, :class_name => "Post"
+    belongs_to :reply_to, :class_name => "Post", optional: true
 
     has_many :replies, :class_name  => "Post",
                        :foreign_key => "reply_to_id",
