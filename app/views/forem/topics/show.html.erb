@@ -27,7 +27,7 @@
     <% end %>
   </div>
 
-  <% if @topic.pending_review? %>
+  <% if @topic.state == 'pending_review' %>
     <div class="moderation alert" id='topic_moderation'>
       <%= t(".pending_review") %>
       <% if forem_admin_or_moderator?(@topic.forum) %>

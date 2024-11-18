@@ -4,12 +4,16 @@ module Forem
     helper 'forem/topics'
 
     def index
-      @categories = Forem::Category.where(:site_id => @site.id).order(:sort_order).all
+      @categories = Forem::Category.where(:site_id => @site.id).by_position
+      if defined?(@page) && defined?(@site)
+        @page.seo_title = "Forums | #{@site.description}"
+      end
     end
 
     def show
+      authorize! :show, @forum
       register_view
-
+      
       @topics = if forem_admin_or_moderator?(@forum)
         @forum.topics
       else
@@ -20,6 +24,10 @@ module Forem
 
       # Kaminari allows to configure the method and param used
       @topics = @topics.send(pagination_method, params[pagination_param]).per(Forem.per_page)
+
+      if defined?(@page) && defined?(@site)
+        @page.seo_title = "#{@forum.title} | #{@forum.category.name} Forums on #{@site.description}"
+      end
 
       respond_to do |format|
         format.html

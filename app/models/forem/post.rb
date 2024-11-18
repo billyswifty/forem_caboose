@@ -2,27 +2,14 @@ module Forem
   class Post < ActiveRecord::Base
     include Workflow
     include Forem::Concerns::NilUser
-
-    workflow_column :state
-    workflow do
-      state :pending_review do
-        event :spam,    :transitions_to => :spam
-        event :approve, :transitions_to => :approved
-      end
-      state :spam
-      state :approved do
-        event :approve, :transitions_to => :approved
-      end
-    end
+    include Forem::StateWorkflow
 
     # Used in the moderation tools partial
     attr_accessor :moderation_option
 
-    attr_accessible :text, :reply_to_id
-
-    belongs_to :topic
-    belongs_to :forem_user, :class_name => Forem.user_class.to_s, :foreign_key => :user_id
-    belongs_to :reply_to, :class_name => "Post"
+    belongs_to :topic, optional: true
+    belongs_to :forem_user, :class_name => "Caboose::User", :foreign_key => :user_id, optional: true
+    belongs_to :reply_to, :class_name => "Post", optional: true
 
     has_many :replies, :class_name  => "Post",
                        :foreign_key => "reply_to_id",
@@ -43,12 +30,17 @@ module Forem
 
       def approved_or_pending_review_for(user)
         if user
-          where arel_table[:state].eq('approved').or(
-                  arel_table[:state].eq('pending_review').and(arel_table[:user_id].eq(user.id))
-                )
+          state_column = "#{Post.table_name}.state"
+          where("#{state_column} = 'approved' OR
+            (#{state_column} = 'pending_review' AND #{Post.table_name}.user_id = :user_id)",
+            user_id: user.id)
         else
           approved
         end
+      end
+
+      def num_pages
+        return 10
       end
 
       def by_created_at
@@ -61,6 +53,15 @@ module Forem
 
       def spam
         where :state => 'spam'
+      end
+
+      def pending_review?
+        Caboose.log(self.state)
+        return self.state == 'pending_review'
+      end
+
+      def approved?
+        return self.state == 'approved'
       end
 
       def visible
@@ -115,7 +116,7 @@ module Forem
     end
 
     def skip_pending_review
-      approve! unless user && user.forem_moderate_posts?
+      approve! # unless user && user.forem_moderate_posts?
     end
 
     def approve_user

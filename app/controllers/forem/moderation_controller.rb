@@ -1,6 +1,6 @@
 module Forem
   class ModerationController < Forem::ApplicationController
-    before_filter :ensure_moderator_or_admin
+    before_action :ensure_moderator_or_admin
 
     helper 'forem/posts'
 
@@ -13,7 +13,7 @@ module Forem
     def posts
       Forem::Post.moderate!(params[:posts] || [])
       flash[:notice] = t('forem.posts.moderation.success')
-      redirect_to :back
+      redirect_to "/forums"
     end
 
     def topic
@@ -24,7 +24,7 @@ module Forem
       else
         flash[:error] = t("forem.topic.moderation.no_option_selected")
       end
-      redirect_to :back
+      redirect_to "/forums"
     end
 
     private

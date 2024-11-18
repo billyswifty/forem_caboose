@@ -1,17 +1,18 @@
 module Forem
   class TopicsController < Forem::ApplicationController
     helper 'forem/posts'
-    before_filter :authenticate_forem_user, :except => [:show]
-    before_filter :find_forum
-    before_filter :block_spammers, :only => [:new, :create]
+    before_action :authenticate_forem_user, :except => [:show]
+    before_action :find_forum
+    before_action :block_spammers, :only => [:new, :create]
 
     def show
       if find_topic
-        register_view(@topic, @logged_in_user)
+        register_view(@topic, forem_user)
         @forem_posts = find_posts(@topic)
-
-        # Kaminari allows to configure the method and param used
         @forem_posts = @forem_posts.send(pagination_method, params[pagination_param]).per(Forem.per_page)
+        if defined?(@page) && defined?(@site)
+          @page.seo_title = "#{@topic.subject} | #{@topic.forum.title} Forum on #{@site.description}"
+        end
       end
     end
 
@@ -19,22 +20,26 @@ module Forem
       authorize! :create_topic, @forum
       @topic = @forum.topics.build
       @topic.posts.build
+      if defined?(@page) && defined?(@site)
+        @page.seo_title = "New Topic | #{@forum.title} Forum on #{@site.description}"
+      end
     end
 
     def create
       authorize! :create_topic, @forum
-      @topic = @forum.topics.build(params[:topic], :as => :default)
-      @topic.user = @logged_in_user
+      @topic = @forum.topics.build(topic_params)
+      @topic.user = forem_user
       if @topic.save
         create_successful
+        @topic.approve
       else
         create_unsuccessful
       end
     end
 
     def destroy
-      @topic = @forum.topics.find(params[:id])
-      if @logged_in_user == @topic.user || @logged_in_user.forem_admin?
+      @topic = @forum.topics.friendly.find(params[:id])
+      if forem_user == @topic.user || forem_user.forem_admin?
         @topic.destroy
         destroy_successful
       else
@@ -44,19 +49,24 @@ module Forem
 
     def subscribe
       if find_topic
-        @topic.subscribe_user(@logged_in_user.id)
+        @topic.subscribe_user(forem_user.id)
         subscribe_successful
       end
     end
 
     def unsubscribe
       if find_topic
-        @topic.unsubscribe_user(@logged_in_user.id)
+        @topic.unsubscribe_user(forem_user.id)
         unsubscribe_successful
       end
     end
 
     protected
+
+    def topic_params
+      params.require(:topic).permit(:subject, :posts_attributes => [[:text]])
+    end
+    
     def create_successful
       redirect_to [@forum, @topic], :notice => t("forem.topic.created")
     end
@@ -90,21 +100,21 @@ module Forem
 
     private
     def find_forum
-      @forum = Forem::Forum.find(params[:forum_id])
+      @forum = Forem::Forum.friendly.find(params[:forum_id])
       authorize! :read, @forum
     end
 
     def find_posts(topic)
       posts = topic.posts
       unless forem_admin_or_moderator?(topic.forum)
-        posts = posts.approved_or_pending_review_for(@logged_in_user)
+        posts = posts.approved_or_pending_review_for(forem_user)
       end
       @forem_posts = posts
     end
 
     def find_topic
       begin
-        @topic = forum_topics(@forum, @logged_in_user).find(params[:id])
+        @topic = forum_topics(@forum, forem_user).friendly.find(params[:id])
         authorize! :read, @topic
       rescue ActiveRecord::RecordNotFound
         flash.alert = t("forem.topic.not_found")
@@ -117,7 +127,7 @@ module Forem
     end
 
     def block_spammers
-      if @logged_in_user.forem_spammer?
+      if forem_user.forem_spammer?
         flash[:alert] = t('forem.general.flagged_for_spam') + ' ' +
                         t('forem.general.cannot_create_topic')
         redirect_to :back

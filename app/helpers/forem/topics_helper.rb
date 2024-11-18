@@ -2,7 +2,8 @@ module Forem
   module TopicsHelper
     def link_to_latest_post(topic)
       post = relevant_posts(topic).last
-      text = "#{time_ago_in_words(post.created_at)} #{t("ago_by")} #{post.user.username}"
+      return nil if post.nil?
+      text = "#{time_ago_in_words(post.created_at)} #{t("ago_by")} #{post.user.forem_name}"
       link_to text, forem.forum_topic_path(post.topic.forum, post.topic, :anchor => "post-#{post.id}", pagination_param => topic.last_page)
     end
 
@@ -20,7 +21,7 @@ module Forem
     end
 
     def relevant_posts(topic)
-      posts = topic.posts.by_created_at.scoped
+      posts = topic.posts.by_created_at
       if forem_admin_or_moderator?(topic.forum)
         posts
       elsif topic.user == forem_user

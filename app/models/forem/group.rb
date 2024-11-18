@@ -4,9 +4,9 @@ module Forem
 
     has_many :memberships
     has_many :members, :through => :memberships, :class_name => Forem.user_class.to_s
-    belongs_to :site, :class_name => "Caboose::Site"
+    belongs_to :site, :class_name => "Caboose::Site", optional: true
 
-    attr_accessible :name, :site_id
+    # attr_accessible :name, :site_id
 
     def to_s
       name

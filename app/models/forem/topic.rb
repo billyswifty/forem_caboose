@@ -5,44 +5,33 @@ module Forem
     include Forem::Concerns::Viewable
     include Forem::Concerns::NilUser
     include Workflow
-
-    workflow_column :state
-    workflow do
-      state :pending_review do
-        event :spam,    :transitions_to => :spam
-        event :approve, :transitions_to => :approved
-      end
-      state :spam
-      state :approved do
-        event :approve, :transitions_to => :approved
-      end
-    end
+    include Forem::StateWorkflow
 
     attr_accessor :moderation_option
 
     extend FriendlyId
-    friendly_id :subject, :use => :slugged
+    friendly_id :subject, :use => [:slugged, :finders]
 
-    attr_accessible :subject, :posts_attributes
-    attr_accessible :subject, :posts_attributes, :pinned, :locked, :hidden, :forum_id, :as => :admin
-
-    belongs_to :forum
-    belongs_to :forem_user, :class_name => Forem.user_class.to_s, :foreign_key => :user_id
-    has_many   :subscriptions
-    has_many   :posts, :dependent => :destroy, :order => "forem_posts.created_at ASC"
-
+    belongs_to :forum, optional: true
+    belongs_to :forem_user, :class_name => Forem.user_class.to_s, :foreign_key => :user_id, optional: true
+    has_many   :subscriptions, :dependent => :destroy
+    has_many   :posts, -> { order "forem_posts.created_at ASC"}, :dependent => :destroy
     accepts_nested_attributes_for :posts
 
-    validates :subject, :presence => true
+    validates :subject, :presence => true, :length => { maximum: 255 }
     validates :user, :presence => true
 
     before_save  :set_first_post_user
     after_create :subscribe_poster
-    after_create :skip_pending_review, :unless => :moderated?
+    after_create :skip_pending_review #, :unless => :moderated?
 
     class << self
       def visible
         where(:hidden => false)
+      end
+
+      def num_pages
+        return 10
       end
 
       def by_pinned
@@ -56,7 +45,7 @@ module Forem
       end
 
       def by_pinned_or_most_recent_post
-	      order('forem_topics.pinned DESC').
+  order('forem_topics.pinned DESC').
         order('forem_topics.last_post_at DESC').
         order('forem_topics.id')
       end
@@ -67,6 +56,14 @@ module Forem
 
       def approved
         where(:state => 'approved')
+      end
+
+      def is_pending_review?
+        return self.state == 'pending_review'
+      end
+
+      def approved?
+        return self.state == 'approved'
       end
 
       def approved_or_pending_review_for(user)
@@ -141,6 +138,19 @@ module Forem
       (self.posts.count.to_f / Forem.per_page.to_f).ceil
     end
 
+    def num_pages
+      return (self.posts.count.to_f / Forem.per_page.to_f).to_i
+    end
+
+    def approve
+      first_post = posts.by_created_at.first
+      if first_post
+        first_post.state = 'approved'
+        first_post.save
+      end
+    #  first_post.approve! unless first_post.approved?
+    end
+
     protected
     def set_first_post_user
       post = posts.first
@@ -151,10 +161,7 @@ module Forem
       update_column(:state, 'approved')
     end
 
-    def approve
-      first_post = posts.by_created_at.first
-      first_post.approve! unless first_post.approved?
-    end
+    
 
     def moderated?
       user.forem_moderate_posts?

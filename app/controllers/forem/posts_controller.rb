@@ -1,29 +1,51 @@
 module Forem
   class PostsController < Forem::ApplicationController
-    before_filter :authenticate_forem_user
-    before_filter :find_topic
-    before_filter :reject_locked_topic!, :only => [:create]
-    before_filter :block_spammers, :only => [:new, :create]
-    before_filter :authorize_reply_for_topic!, :only => [:new, :create]
-    before_filter :authorize_edit_post_for_forum!, :only => [:edit, :update]
-    before_filter :find_post_for_topic, :only => [:edit, :update, :destroy]
-    before_filter :ensure_post_ownership!, :only => [:destroy]
-    before_filter :authorize_destroy_post_for_forum!, :only => [:destroy]
+    before_action :authenticate_forem_user, except: :show
+    before_action :find_topic
+    before_action :reject_locked_topic!, only: [:new, :create]
+
+    def show
+      find_post
+      page = (@topic.posts.count.to_f / Forem.per_page.to_f).ceil
+
+      if defined?(@page) && defined?(@site)
+        @page.seo_title = "#{@post.title} | #{@post.forum.title} Forums on #{@site.description}"
+      end
+
+      redirect_to forum_topic_url(@topic.forum, @topic, pagination_param => page, anchor: "post-#{@forem_post.id}")
+    end
 
     def new
+      authorize_reply_for_topic!
+      block_spammers
       @forem_post = @topic.posts.build
       find_reply_to_post
+
       if params[:quote] && @reply_to_post
         @forem_post.text = view_context.forem_quote(@reply_to_post.text)
       elsif params[:quote] && !@reply_to_post
         flash[:notice] = t("forem.post.cannot_quote_deleted_post")
         redirect_to [@topic.forum, @topic]
       end
+
+      
+      #@forem_post.save
+
+      if defined?(@page) && defined?(@site)
+        @page.seo_title = "New Post | #{@topic.subject} Forum on #{@site.description}"
+      end
+
     end
 
     def create
-      @forem_post = @topic.posts.build(params[:post])
+      authorize_reply_for_topic!
+      block_spammers
+      @forem_post = @topic.posts.build(post_params)
       @forem_post.user = forem_user
+
+      forem_user.update_column(:forem_state, "approved") if forem_user && forem_user.forem_state != "approved"
+
+      @forem_post.state = 'approved'
 
       if @forem_post.save
         create_successful
@@ -33,10 +55,14 @@ module Forem
     end
 
     def edit
+      authorize_edit_post_for_forum!
+      find_post
     end
 
     def update
-      if @forem_post.owner_or_admin?(forem_user) && @forem_post.update_attributes(params[:post])
+      authorize_edit_post_for_forum!
+      find_post
+      if @forem_post.owner_or_admin?(forem_user) && @forem_post.update_attributes(post_params)
         update_successful
       else
         update_failed
@@ -44,11 +70,21 @@ module Forem
     end
 
     def destroy
+      authorize_destroy_post_for_forum!
+      find_post
+      unless @forem_post.owner_or_admin? forem_user
+        flash[:alert] = t("forem.post.cannot_delete")
+        redirect_to [@topic.forum, @topic] and return
+      end
       @forem_post.destroy
       destroy_successful
     end
 
     private
+
+    def post_params
+      params.require(:post).permit(:text, :reply_to_id)
+    end
 
     def authorize_reply_for_topic!
       authorize! :reply, @topic
@@ -93,18 +129,11 @@ module Forem
       render :action => "edit"
     end
 
-    def ensure_post_ownership!
-      unless @forem_post.owner_or_admin? forem_user
-        flash[:alert] = t("forem.post.cannot_delete")
-        redirect_to [@topic.forum, @topic] and return
-      end
-    end
-
     def find_topic
-      @topic = Forem::Topic.find params[:topic_id]
+      @topic = Forem::Topic.friendly.find params[:topic_id]
     end
 
-    def find_post_for_topic
+    def find_post
       @forem_post = @topic.posts.find params[:id]
     end
 
