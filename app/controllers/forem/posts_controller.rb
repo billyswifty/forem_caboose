@@ -28,6 +28,9 @@ module Forem
         redirect_to [@topic.forum, @topic]
       end
 
+      
+      #@forem_post.save
+
       if defined?(@page) && defined?(@site)
         @page.seo_title = "New Post | #{@topic.subject} Forum on #{@site.description}"
       end
@@ -39,6 +42,10 @@ module Forem
       block_spammers
       @forem_post = @topic.posts.build(post_params)
       @forem_post.user = forem_user
+
+      forem_user.update_column(:forem_state, "approved") if forem_user && forem_user.forem_state != "approved"
+
+      @forem_post.state = 'approved'
 
       if @forem_post.save
         create_successful

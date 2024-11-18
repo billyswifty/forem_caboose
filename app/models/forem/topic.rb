@@ -12,8 +12,8 @@ module Forem
     extend FriendlyId
     friendly_id :subject, :use => [:slugged, :finders]
 
-    belongs_to :forum
-    belongs_to :forem_user, :class_name => Forem.user_class.to_s, :foreign_key => :user_id
+    belongs_to :forum, optional: true
+    belongs_to :forem_user, :class_name => Forem.user_class.to_s, :foreign_key => :user_id, optional: true
     has_many   :subscriptions, :dependent => :destroy
     has_many   :posts, -> { order "forem_posts.created_at ASC"}, :dependent => :destroy
     accepts_nested_attributes_for :posts
@@ -23,7 +23,7 @@ module Forem
 
     before_save  :set_first_post_user
     after_create :subscribe_poster
-    after_create :skip_pending_review, :unless => :moderated?
+    after_create :skip_pending_review #, :unless => :moderated?
 
     class << self
       def visible
@@ -56,6 +56,14 @@ module Forem
 
       def approved
         where(:state => 'approved')
+      end
+
+      def is_pending_review?
+        return self.state == 'pending_review'
+      end
+
+      def approved?
+        return self.state == 'approved'
       end
 
       def approved_or_pending_review_for(user)
@@ -134,6 +142,15 @@ module Forem
       return (self.posts.count.to_f / Forem.per_page.to_f).to_i
     end
 
+    def approve
+      first_post = posts.by_created_at.first
+      if first_post
+        first_post.state = 'approved'
+        first_post.save
+      end
+    #  first_post.approve! unless first_post.approved?
+    end
+
     protected
     def set_first_post_user
       post = posts.first
@@ -144,10 +161,7 @@ module Forem
       update_column(:state, 'approved')
     end
 
-    def approve
-      first_post = posts.by_created_at.first
-      first_post.approve! unless first_post.approved?
-    end
+    
 
     def moderated?
       user.forem_moderate_posts?

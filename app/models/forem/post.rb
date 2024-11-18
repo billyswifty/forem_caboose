@@ -7,8 +7,8 @@ module Forem
     # Used in the moderation tools partial
     attr_accessor :moderation_option
 
-    belongs_to :topic
-    belongs_to :forem_user, :class_name => "Caboose::User", :foreign_key => :user_id
+    belongs_to :topic, optional: true
+    belongs_to :forem_user, :class_name => "Caboose::User", :foreign_key => :user_id, optional: true
     belongs_to :reply_to, :class_name => "Post", optional: true
 
     has_many :replies, :class_name  => "Post",
@@ -53,6 +53,15 @@ module Forem
 
       def spam
         where :state => 'spam'
+      end
+
+      def pending_review?
+        Caboose.log(self.state)
+        return self.state == 'pending_review'
+      end
+
+      def approved?
+        return self.state == 'approved'
       end
 
       def visible
@@ -107,7 +116,7 @@ module Forem
     end
 
     def skip_pending_review
-      approve! unless user && user.forem_moderate_posts?
+      approve! # unless user && user.forem_moderate_posts?
     end
 
     def approve_user

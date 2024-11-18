@@ -7,7 +7,7 @@ module Forem
     extend FriendlyId
     friendly_id :name, :use => [:slugged, :finders]
 
-    belongs_to :category
+    belongs_to :category, optional: true
 
     has_many :topics,     :dependent => :destroy
     has_many :posts,      :through => :topics, :dependent => :destroy

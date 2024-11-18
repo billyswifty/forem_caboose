@@ -9,10 +9,7 @@ module Forem
       if find_topic
         register_view(@topic, forem_user)
         @forem_posts = find_posts(@topic)
-
-        # Kaminari allows to configure the method and param used
         @forem_posts = @forem_posts.send(pagination_method, params[pagination_param]).per(Forem.per_page)
-
         if defined?(@page) && defined?(@site)
           @page.seo_title = "#{@topic.subject} | #{@topic.forum.title} Forum on #{@site.description}"
         end
@@ -34,6 +31,7 @@ module Forem
       @topic.user = forem_user
       if @topic.save
         create_successful
+        @topic.approve
       else
         create_unsuccessful
       end

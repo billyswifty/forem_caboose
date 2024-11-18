@@ -1,7 +1,7 @@
 
 <div class="row">
   <div id='post_<%= post.id %>' class='post <%= cycle('odd', 'even') -%> col-md-12'>
-    <% if post.pending_review? %>
+    <% if post.state == 'pending_review' %>
       <div class='moderation alert'>
         <%= t(".pending_review") %>
         <% if forem_admin_or_moderator?(post.topic.forum) %>

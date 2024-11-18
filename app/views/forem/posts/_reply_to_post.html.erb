@@ -12,7 +12,10 @@
 
   <div class='contents col-md-7'>
     <time datetime="<%= post.created_at.to_s(:db) -%>"><%= "#{time_ago_in_words(post.created_at)} #{t("ago")}" %></time>
-    <%= forem_format(post.text) %>
+
+    <div class="richtext">
+      <%== forem_format(post.text) %>
+    </div>
 
     <% if post.reply_to %>
       <span class='in_reply_to'>

@@ -12,7 +12,9 @@ module Forem
         txt = txt.gsub(bw,st).gsub(bw.upcase,st).gsub(bw.titleize,st)
       end
       begin
-        return Rinku.auto_link(txt, mode=:all, link_attr='target="_blank"', skip_tags=nil)
+        txt = Rinku.auto_link(txt, mode=:all, link_attr='target="_blank" rel="ugc"', skip_tags=nil)
+        txt = txt.gsub("<a ",'<a rel="ugc"')
+        return txt
       rescue
         return txt
       end
